@@ -42,49 +42,21 @@ const styles = StyleSheet.create({
         fontSize:16,
         alignSelf: 'center',
         color:'#68BCFF'
-    }
+    },
+    
 
 })
 
 function Login({navigation}) {
-
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [show, setShow] = useState(true)
-
-    const hasErrors = () => {
-        return !email.includes('@');
-      };
-
-      const isStrongPassword = () => {
-        const isLengthValid = password.length >= 8;
-    
-        const regexUpperCase = /[A-Z]/;
-        const regexLowerCase = /[a-z]/;
-        const regexDigit = /\d/;
-        const regexSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
-    
-        const isUpperCaseValid = regexUpperCase.test(password);
-        const isLowerCaseValid = regexLowerCase.test(password);
-        const isDigitValid = regexDigit.test(password);
-        const isSpecialCharValid = regexSpecialChar.test(password);
-    
-
-        return (
-          isLengthValid &&
-          isUpperCaseValid &&
-          isLowerCaseValid &&
-          isDigitValid &&
-          isSpecialCharValid
-        );
-      };
+        
       const handleLogin = (values) => {
         const {email, password} =  values
         auth().signInWithEmailAndPassword(email, password)
         .then(
             () => navigation.navigate('Home')
         )
-        .catch(err => console.error(err))
+        .catch(err => console.log("Login failed"))
         
 
       }
@@ -106,19 +78,17 @@ function Login({navigation}) {
                     <Text style={styles.label}>Welcome back!</Text>
                     <TextInput
                     style={styles.input}
-                    name='Email'
+                    label='Email'
                     value={values.email}
                     placeholder='Enter email'
                     onChangeText={handleChange('email')}
                     onBlur={handleBlur('email')}
                     left={<TextInput.Icon icon='email'/>}/>
-                     <HelperText type="error" visible={hasErrors()}>
-                         Email address is invalid!
-                     </HelperText>
+                     
 
                     <TextInput
                     style={styles.input}
-                    name='Password'
+                    label='Password'
                     value={values.password}
                     secureTextEntry = {show}
                     placeholder='Enter password'
@@ -126,22 +96,20 @@ function Login({navigation}) {
                     onBlur={handleBlur('password')}
                     left={<TextInput.Icon icon='email'/>}
                     right={<TextInput.Icon icon='eye' onPress={()=> setShow(!show)}/> }/>
-                    <HelperText type="error" visible={!isStrongPassword()}>
-                         Password is not strong enough!
-                    </HelperText>
-
+                   
                     <Button mode='contained' style={styles.btn} onPress={(handleSubmit)}>
                         <Text>Login</Text>
                     </Button>
 
-                    <TouchableOpacity style={styles.linkText}
+                    <Button 
                         onPress={()=> navigation.navigate('Signup')}
                     >
-                        <Text>Create a new account?</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.linkText}
+                        <Text style={styles.linkText}>Create a new account?</Text></Button>
+                    <Button 
                         onPress={()=> navigation.navigate('ForgotPassword')}
                      >
-                        <Text>Forgot Password</Text></TouchableOpacity>
+                        <Text style={styles.linkText}>Forgot Password</Text></Button>
+
                 </View>
                 )}
            </Formik>

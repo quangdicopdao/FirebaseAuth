@@ -5,10 +5,10 @@ import auth from '@react-native-firebase/auth'
 import { Formik } from 'formik';
 
 function SignUp({navigation}) {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmpassword, setconfirmPassword] = useState('')
     const [show, setShow] = useState(true)
+    const [email,setEmail] = useState('')
+    const [password,setpassword] = useState('')
+    const [confirmpassword,setConfirmPassword] = useState('')
 
     const hasErrors = () => {
         return !email.includes('@');
@@ -26,13 +26,15 @@ function SignUp({navigation}) {
         const isLowerCaseValid = regexLowerCase.test(password);
         const isDigitValid = regexDigit.test(password);
         const isSpecialCharValid = regexSpecialChar.test(password);
-    
+        const isConfirm = password === confirmpassword;
+
         return (
           isLengthValid &&
           isUpperCaseValid &&
           isLowerCaseValid &&
           isDigitValid &&
-          isSpecialCharValid
+          isSpecialCharValid &&
+          isConfirm
         );
       };
     const handleSignUp = async values =>{
@@ -48,34 +50,31 @@ function SignUp({navigation}) {
     return ( 
         <Formik 
         initialValues={{
-            email: "",
-            password: "",
-            confirmpassword: "",
+            email : '',
+            password : '',
+            confirmpassword : ''
         }}
         onSubmit={values => handleSignUp(values)}
         >
-            {({handleBlur,handleChange,handleSubmit,values}) =>(
+            {({handleBlur,handleChange,handleSubmit,values,touched,errors}) =>(
         <View style={styles.container}>
             <Text style={styles.label}>Create a new account!</Text>
            
                     <TextInput
                     style={styles.input}
-                    name='Email'
+                    label='Email'
                     value={values.email}
-                    keyboardType='email-address'
-                    textContentType='emailAddress'
-                    autoFocus
                     placeholder='Enter email'
                     onChangeText={handleChange('email')}
                     onBlur={handleBlur('email')}
                     left={<TextInput.Icon icon='email'/>}/>
-                     <HelperText type="error" visible={hasErrors()}>
+                     <HelperText style={styles.hpText} type="error" visible={touched.email  && hasErrors()}>
                          Email address is invalid!
                      </HelperText>
 
                     <TextInput
                     style={styles.input}
-                    name='Password'
+                    label='Password'
                     value={values.password}
                     secureTextEntry = {show}
                     placeholder='Enter password'
@@ -83,14 +82,15 @@ function SignUp({navigation}) {
                     onBlur={handleBlur('password')}
                     left={<TextInput.Icon icon='email'/>}
                     right={<TextInput.Icon icon='eye' onPress={()=> setShow(!show)}/> }/>
-                    <HelperText type="error" visible={!isStrongPassword()}>
+
+                    <HelperText style={styles.hpText} type="error" visible={ touched.password && !isStrongPassword()}>
                          Password is not strong enough!
                     </HelperText>
 
 
                     <TextInput
                     style={styles.input}
-                    name='Confirm Password'
+                    label='Confirm Password'
                     value={values.confirmpassword}
                     secureTextEntry = {show}
                     placeholder='Enter confirm password'
@@ -98,8 +98,9 @@ function SignUp({navigation}) {
                     onBlur={handleBlur('confirmpassword')}
                     left={<TextInput.Icon icon='email'/>}
                     right={<TextInput.Icon icon='eye' onPress={()=> setShow(!show)}/> }/>
-                    <HelperText type="error" visible={!isStrongPassword()}>
-                         Password is not strong enough!
+
+                    <HelperText style={styles.hpText} type="error" visible={touched.confirmpassword && !isStrongPassword()}>
+                         Confirm password is not same with password!
                     </HelperText>
 
 
@@ -135,7 +136,6 @@ const styles = StyleSheet.create({
         paddingBottom:20
     },
     input:{
-        marginBottom:20
     },
     btn:{
         marginTop:20,
@@ -147,6 +147,9 @@ const styles = StyleSheet.create({
         marginTop:20,
         alignSelf: 'center',
         color:'#68BCFF'
+    },
+    hpText:{
+        marginBottom:10
     }
 })
 export default SignUp;

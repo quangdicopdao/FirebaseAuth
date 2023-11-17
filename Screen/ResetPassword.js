@@ -29,7 +29,7 @@ function ResetPassword({navigation}) {
             <Text style={styles.label}>Reset Password</Text>
                 <TextInput
                 style={styles.input}
-                name='Email'
+                label='Email'
                 value={values.email}
                 placeholder='Enter email'
                 onChangeText={handleChange('email')}

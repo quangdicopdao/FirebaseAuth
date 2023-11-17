@@ -10,7 +10,7 @@ function HomeScreen() {
     }
     return ( 
         <View style={styles.container}>
-            <Text style={styles.text}>Home</Text>
+            <Text style={styles.text}>Home</Text>x
             <Button style={styles.btn} title='Sign Out' onPress={handleLogout}>
                 <Text style={styles.btnText}>Sign Out</Text>
             </Button>
