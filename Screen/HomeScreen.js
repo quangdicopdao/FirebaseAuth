@@ -10,7 +10,6 @@ function HomeScreen() {
     }
     return ( 
         <View style={styles.container}>
-            <Text style={styles.text}>Home</Text>x
             <Button style={styles.btn} title='Sign Out' onPress={handleLogout}>
                 <Text style={styles.btnText}>Sign Out</Text>
             </Button>
@@ -21,11 +20,6 @@ function HomeScreen() {
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-    },
-    text:{
-        fontSize:25,
-        fontWeight: 'bold',
-        color:'black'
     },
     btn:{
         backgroundColor:'blue',

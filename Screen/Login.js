@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import {View, Image, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {View, Image, StyleSheet, Text, TouchableOpacity, Alert} from 'react-native';
 import { Button,  TextInput, HelperText } from 'react-native-paper';
 import auth from '@react-native-firebase/auth'
 import { Formik } from 'formik';
+import * as Yup from 'yup'
+
+
 const styles = StyleSheet.create({
     container:{
         width: '100%',
@@ -52,11 +55,25 @@ function Login({navigation}) {
         
       const handleLogin = (values) => {
         const {email, password} =  values
-        auth().signInWithEmailAndPassword(email, password)
-        .then(
-            () => navigation.navigate('Home')
-        )
-        .catch(err => console.log("Login failed"))
+       
+        if(!email.trim() || !password.trim()) {
+            Alert.alert('Thông báo','Vui lòng nhập đủ thông tin ')
+        }
+        else{
+
+            auth().signInWithEmailAndPassword(email, password)
+            .then(
+                () => navigation.navigate('BookIndex')
+            )
+            .catch(() =>{
+                err => console.log(err)
+                Alert.alert('Thông báo','Đăng nhập không thành công')
+            })
+        }
+            const validateSchema = Yup.object().shape({
+                email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
+                password: Yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
+            })
         
 
       }
@@ -73,7 +90,7 @@ function Login({navigation}) {
                      }}
                      onSubmit={values => handleLogin(values)}
                 >
-            {({handleBlur,handleChange,handleSubmit,values}) =>(
+            {({handleBlur,handleChange,handleSubmit,values,touched,errors}) =>(
                 <View style={styles.wrapperBody}>
                     <Text style={styles.label}>Welcome back!</Text>
                     <TextInput
@@ -84,6 +101,7 @@ function Login({navigation}) {
                     onChangeText={handleChange('email')}
                     onBlur={handleBlur('email')}
                     left={<TextInput.Icon icon='email'/>}/>
+                    {touched.email && errors.email && <Text style={{ color: 'red' }}>{errors.email}</Text>}
                      
 
                     <TextInput
@@ -96,7 +114,9 @@ function Login({navigation}) {
                     onBlur={handleBlur('password')}
                     left={<TextInput.Icon icon='email'/>}
                     right={<TextInput.Icon icon='eye' onPress={()=> setShow(!show)}/> }/>
+                    {touched.password && errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
                    
+
                     <Button mode='contained' style={styles.btn} onPress={(handleSubmit)}>
                         <Text>Login</Text>
                     </Button>
