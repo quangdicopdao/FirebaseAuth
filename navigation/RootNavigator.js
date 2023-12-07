@@ -22,7 +22,7 @@ export const RootNavigator = () => {
    
     return (
         <NavigationContainer>
-             {user ? <AuthStack /> : <AppStack />}
+             {user ? <AppStack /> : <AuthStack />}
          </NavigationContainer>
     );
  };

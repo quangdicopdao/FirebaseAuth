@@ -12,10 +12,9 @@ const LineDevider = () => {
   );
 };
 
-function BookDetails() {
+function BookDetails({route}) {
   const navigation = useNavigation();
-  const book = true; // Thêm biến book để kiểm tra
-
+  const { book } = route.params;
   function renderBookDescription() {
     return (
       <View style={{ flex: 1, flexDirection: 'row', padding: 10 }}>
@@ -27,7 +26,7 @@ function BookDetails() {
           scrollEventThrottle={16}
         >
           <Text style={{ fontSize: 20, fontWeight: 'bold',color:'#fff' }}>Description</Text>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' ,color:'#fff'}}>Book Description</Text>
+          <Text style={{ fontSize: 16,color:'#fff',lineHeight:20}}>{book.description}</Text>
         </ScrollView>
       </View>
     );
@@ -37,7 +36,7 @@ function BookDetails() {
     return (
       <View style={{ flex: 1 }}>
         <ImageBackground
-          source={require('../assets/img/books/OtherWordsForHome.jpg')}
+          source={{uri:book.bookCover}}
           resizeMode="cover"
           style={{
             position: "absolute",
@@ -86,14 +85,14 @@ function BookDetails() {
         {/* book cover */}
         <View style={{ flex: 5, paddingTop: 10, alignItems: 'center', justifyContent: 'flex-start' }}>
           <Image
-            source={require('../assets/img/books/OtherWordsForHome.jpg')}
+            source={{uri:book.bookCover}}
             resizeMode='contain'
             style={{ flex: 1, width: 150, height: 'auto', }} />
         </View>
         {/* bookname and author */}
         <View style={{ flex: 1.8, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Name</Text>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Author</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{book.bookName}</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{book.author}</Text>
         </View>
         {/* book info */}
         <View
@@ -105,17 +104,17 @@ function BookDetails() {
             backgroundColor: 'rgba(0,0,0,0.3)'
           }}>
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>4.5</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{book.rating}</Text>
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Rating</Text>
           </View>
           <LineDevider />
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>345</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{book.pageNo}</Text>
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Number of Page</Text>
           </View>
           <LineDevider />
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Eng</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{book.language}</Text>
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Language</Text>
           </View>
         </View>

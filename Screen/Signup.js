@@ -23,7 +23,6 @@ function SignUp({navigation}) {
     //signup
     const handleSignUp = async values =>{
     const {email, password} = values
-        const isValidInfo = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
                 auth()
                 .createUserWithEmailAndPassword(email, password)
                 .then(
@@ -32,16 +31,16 @@ function SignUp({navigation}) {
                 .catch(err => console.log(err));
         }
     return ( 
-        <Formik 
-        initialValues={{
-            email : '',
-            password : '',
-            confirmpassword : ''
-        }}
-        onSubmit={values => handleSignUp(values)}
-        validationSchema={validateSchema}
-        >
-            {({handleBlur,handleChange,handleSubmit,values,touched,errors}) =>(
+            <Formik 
+            initialValues={{
+                email : '',
+                password : '',
+                confirmpassword : ''
+            }}
+            onSubmit={values => handleSignUp(values)}
+            validationSchema={validateSchema}
+            >
+                {({handleBlur,handleChange,handleSubmit,values,touched,errors}) =>(
         <View style={styles.container}>
             <Text style={styles.label}>Create a new account!</Text>
            

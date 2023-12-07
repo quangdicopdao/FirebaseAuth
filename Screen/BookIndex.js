@@ -1,18 +1,34 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {Text, View,StyleSheet,Image } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { Button } from "react-native-paper";
 import { NavButton,BookComponent,ShowNameComponent,ButtonComponent,ListBookComponent } from "../components";
 import { useNavigation } from '@react-navigation/native';
-import data from '../data'
+import firestore from '@react-native-firebase/firestore';
 
 function BookIndex() {
     const navigation = useNavigation();
     const [selectedCategory, setSelectedCategory] = useState(1)
     const [user, setUser] = useState(true)
+
+    const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    // Lắng nghe sự thay đổi của collection "books"
+    const unsubscribe = firestore().collection("books").onSnapshot((snapshot) => {
+      const booksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBooks(booksData);
+    });
+
+    // Hủy đăng ký lắng nghe khi component unmount
+    return () => unsubscribe();
+  }, []); // Dependency array là rỗng, vì chúng ta chỉ muốn lắng nghe một lần khi component được render.
     return (  
         // header
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
             {user ?  
             <ShowNameComponent/> 
             : 
@@ -27,49 +43,61 @@ function BookIndex() {
             <Text style={styles.txtSev}>|</Text>
             <NavButton icon='credit-card'>My card</NavButton>
         </View>
-        {/* list book */}
-            <ScrollView contentContainerStyle={styles.wrapScrolBook} horizontal>
-                <BookComponent 
-                    onClick={()=>{navigation.navigate('BookDetails')}}
-                    time='3d 7h' 
-                    percent='70%' 
-                    iconPercent='layers-triple-outline' 
-                    iconTime='clock' 
-                    srcImg={require('../assets/img/books/OtherWordsForHome.jpg')}
-                />
-            </ScrollView>
-            {/* tab navigation */}
-
-        <ScrollView contentContainerStyle={styles.wrapCategory}>
-                <Button mode="text"
-                labelStyle={{
-                    color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                    ,fontSize:18
-                }}>
-                    Best Seller
-                </Button>
-                <Button mode="text"
-                labelStyle={{
-                    color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                    ,fontSize:18
-                }}>
-                    The lastest
-                </Button>
-                <Button mode="text"
-                labelStyle={{
-                    color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                    ,fontSize:18
-                }}>
-                    Coming soon
-                </Button>
-        </ScrollView >
         <ScrollView>
-                <ListBookComponent title='Other words for home aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' author='john cena' srcImg={require('../assets/img/books/OtherWordsForHome.jpg')}/>
-                <ListBookComponent title='Other words for home' author='john cena' srcImg={require('../assets/img/books/TheMetropolist.jpg')}/>
-                <ListBookComponent title='Other words for home' author='john cena' srcImg={require('../assets/img/books/TheTinyDragon.jpg')}/>
-                <ListBookComponent title='Other words for home' author='john cena' srcImg={require('../assets/img/books/Underland.jpg')}/>
+            {/* list book */}
+                <ScrollView contentContainerStyle={styles.wrapScrolBook} horizontal >
+                    {books.map((book) =>(
+                             <BookComponent 
+                             key={book.id}
+                             onClick={()=>{navigation.navigate('BookDetails', { book: book })}}
+                             time= {book.lastRead}
+                             percent={book.completion} 
+                             iconPercent='layers-triple-outline' 
+                             iconTime='clock' 
+                             srcImg={{uri: book.bookCover}}
+                         />
+                    ))}
+                  
+                   
+                </ScrollView>
+                {/* tab navigation */}
+    
+            <ScrollView contentContainerStyle={styles.wrapCategory}>
+                    <Button mode="text"
+                    labelStyle={{
+                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
+                        ,fontSize:18
+                    }}>
+                        Best Seller
+                    </Button>
+                    <Button mode="text"
+                    labelStyle={{
+                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
+                        ,fontSize:18
+                    }}>
+                        The lastest
+                    </Button>
+                    <Button mode="text"
+                    labelStyle={{
+                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
+                        ,fontSize:18
+                    }}>
+                        Coming soon
+                    </Button>
+            </ScrollView >
+            <ScrollView>
+                {books.map((book) => (
+                    <ListBookComponent 
+                        key={book.id} 
+                        title={book.bookName} 
+                        author={book.author} 
+                        srcImg={{uri:book.bookCover}} 
+                        onClick={()=>{navigation.navigate('BookDetails', { book: book })}}/>
+                ))}
+        
+            </ScrollView>
         </ScrollView>
-    </ScrollView>);
+    </View>);
 }
 
 export default BookIndex;
