@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, StyleSheet,View,TouchableOpacity } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
-function ListBookComponent({srcImg, title, author,onClick}) {
+function ListBookComponent({srcImg, title, author,genres,onClick}) {
     return (
      <View style={styles.wrap}>
             <TouchableOpacity style={styles.container} onPress={onClick}>
@@ -12,9 +12,16 @@ function ListBookComponent({srcImg, title, author,onClick}) {
                             {title}
                         </Text>
                         <Text style={styles.txt} ellipsizeMode='tail'>{author}</Text>
-                        <Button mode='outlined'  style={styles.cateBtn}>
-                          <Text style={styles.txt}>abc</Text>
-                      </Button>
+                        <View style={styles.genreContainer}>
+                        {genres.map((genre, index) => (
+                          <React.Fragment key={genre}>
+                            {index > 0 && <Text style={styles.genreSeparator}>  </Text>}
+                            <View  style={styles.cateBtn}>
+                              <Text style={styles.txt}>{genre}</Text>
+                            </View>
+                          </React.Fragment>
+                        ))}
+                      </View>
                 </View>
                 
           </TouchableOpacity>
@@ -51,7 +58,7 @@ const styles = StyleSheet.create({
       txt: {
         color: '#fff',
         fontSize: 16,
-        marginTop:5
+        textAlign:'center'
       },
       buttonContainer: {
         flexDirection: 'row',
@@ -65,9 +72,18 @@ const styles = StyleSheet.create({
       },
       cateBtn:{
         height:40,
-        width:50,
-        marginTop:5
-
-      }
+        width:80,
+        borderRadius:20,
+        backgroundColor:'rgba(0 ,255, 0,0.5)'      ,
+        justifyContent:'center'                
+      },
+      genreContainer: {
+        flexDirection: 'row',
+        marginTop: 5,
+      },
+      genreSeparator: {
+        color: '#fff',
+        fontSize: 16,
+      },
 })
 export default ListBookComponent;

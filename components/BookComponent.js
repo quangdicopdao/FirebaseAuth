@@ -27,8 +27,7 @@ const styles = StyleSheet.create({
     img:{
         height:250,
         width:200,
-        borderBottomLeftRadius:10,
-        borderBottomRightRadius:10,
+        borderRadius:20,
         marginLeft:10
     },
     btnImg:{

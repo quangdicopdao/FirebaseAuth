@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {View, Image, StyleSheet, Text, TouchableOpacity, Alert} from 'react-native';
 import { Button,  TextInput, HelperText } from 'react-native-paper';
 import auth from '@react-native-firebase/auth'
 import { Formik } from 'formik';
 import * as Yup from 'yup'
-
+import { useMyContextController,login } from '../providers';
+import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
     container:{
@@ -50,33 +51,21 @@ const styles = StyleSheet.create({
 
 })
 
-function Login({navigation}) {
+function Login() {
     const [show, setShow] = useState(true)
-        
-      const handleLogin = (values) => {
-        const {email, password} =  values
-       
-        if(!email.trim() || !password.trim()) {
-            Alert.alert('Thông báo','Vui lòng nhập đủ thông tin ')
-        }
-        else{
-
-            auth().signInWithEmailAndPassword(email, password)
-            .then(
-                () => navigation.navigate('BookIndex')
-            )
-            .catch(() =>{
-                err => console.log(err)
-                Alert.alert('Thông báo','Đăng nhập không thành công')
-            })
-        }
-            const validateSchema = Yup.object().shape({
-                email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
-                password: Yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
-            })
-        
-
-      }
+    const navigation = useNavigation()
+    const [controller, dispatch] = useMyContextController();
+    const {userLogin} = controller;
+    useEffect(() => {
+        console.log("useEffect triggered");
+        if (userLogin !== null)
+        { navigation.navigate("BookIndex",)
+    };
+      }, [userLogin]);
+    const handleLogin =(values)=>{
+        const{email, password} = values
+        login(dispatch,email,password);
+    }
     return (  
             <View style={styles.container}>
                 <View style={styles.wrapperImg}>

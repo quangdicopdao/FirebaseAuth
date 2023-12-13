@@ -1,35 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthenticatedUserProvider } from './providers';
-import { RootNavigator } from './navigation/RootNavigator';
-import {myBooksData,categoriesData} from './data'
-import firestore from '@react-native-firebase/firestore'
-import  storage from '@react-native-firebase/storage'
+import { myBooksData, categoriesData } from './data';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import { MyContextControllerProvider } from "./providers";
+import { AuthStack } from "./navigation/AuthStack";
+import { NavigationContainer } from "@react-navigation/native";
 
 const db = firestore();
 const Users = db.collection('users');
 const Books = db.collection('books');
 const Categories = db.collection('categories');
-const storageRef = storage().ref();  // Chỉnh sửa đây để sử dụng storage()
+const storageRef = storage().ref();
 
 const initial = async () => {
-  // Khởi tạo một người dùng admin
-  const admin = {
-    userName: "huutv@tdmu.edu.vn",
-    password: "123",
-    point: 200,
-    address: "Binh Duong",
-    role: "user"
-  };
-
   try {
+    // Khởi tạo một người dùng admin
+    const admin = {
+      userName: "huutv@tdmu.edu.vn",
+      password: "123",
+      point: 200,
+      address: "Binh Duong",
+      role: "user",
+    };
+
     // Lưu thông tin người dùng admin vào Firestore
     await Users.doc(admin.userName).set(admin);
     console.log("Thêm người dùng mới!");
 
     // Duyệt qua danh sách sách và tải lên URL ảnh bìa sách từ Storage
     for (const book of myBooksData) {
-      const path =  book.bookCover;
+      const path = book.bookCover;
 
       try {
         // Lấy URL từ Firebase Storage
@@ -58,36 +59,41 @@ const initial = async () => {
   }
 };
 
-// Gọi hàm initial để thực hiện các thao tác khởi tạo
-
 function App() {
-initial();
-const [profileData, setProfileData] = useState(0);
-const [booksData, setBooksData] = useState([]);
-const [categoriesData, setCategoriesData] = useState([]);
-useEffect(() => {
-  Users.doc("huutv@tdmu.edu.vn").onSnapshot((u) => setProfileData(u.data()));
+  // initial()
+  const [profileData, setProfileData] = useState(null);
+  const [booksData, setBooksData] = useState([]);
+  const [categoriesData, setCategoriesData] = useState([]);
 
-  Books.onSnapshot((IstBooks) => {
-    const result = [];
-    IstBooks.forEach((b) => result.push(b.data()));
-    setBooksData(result);
-  });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userSnapshot = await Users.doc("huutv@tdmu.edu.vn").get();
+        setProfileData(userSnapshot.data());
 
-  Categories.get().then((IstCategories) => {
-    const result = [];
-    IstCategories.forEach((c) => result.push(c.data()));
-    setCategoriesData(result);
-  });
-}, []); // Dependency array is empty, so this useEffect runs only once.
+        const booksSnapshot = await Books.get();
+        const booksResult = booksSnapshot.docs.map((doc) => doc.data());
+        setBooksData(booksResult);
 
+        const categoriesSnapshot = await Categories.get();
+        const categoriesResult = categoriesSnapshot.docs.map((doc) => doc.data());
+        setCategoriesData(categoriesResult);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu từ Firestore: ", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <AuthenticatedUserProvider>
+    <MyContextControllerProvider>
       <SafeAreaProvider>
-        <RootNavigator />
+        <NavigationContainer>
+          <AuthStack />
+        </NavigationContainer>
       </SafeAreaProvider>
-    </AuthenticatedUserProvider>
+    </MyContextControllerProvider>
   );
 }
 

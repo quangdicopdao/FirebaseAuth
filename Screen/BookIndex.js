@@ -5,17 +5,37 @@ import { Button } from "react-native-paper";
 import { NavButton,BookComponent,ShowNameComponent,ButtonComponent,ListBookComponent } from "../components";
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import { useMyContextController } from '../providers'
 
 function BookIndex() {
     const navigation = useNavigation();
     const [selectedCategory, setSelectedCategory] = useState(1)
-    const [user, setUser] = useState(true)
+    const [filteredBooks, setFilteredBooks] = useState([]);
+    const [{ userLogin }] = useMyContextController();
+    const { name, point } = userLogin;
+
 
     const [books, setBooks] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
+//   useEffect(() => {
+//     // Lắng nghe sự thay đổi của collection "books"
+//     const unsubscribe = firestore().collection("books").onSnapshot((snapshot) => {
+//       const booksData = snapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       }));
+//       setBooks(booksData);
+//     });
+
+//     // Hủy đăng ký lắng nghe khi component unmount
+//     return () => unsubscribe();
+//   }, []); // Dependency array là rỗng, vì chúng ta chỉ muốn lắng nghe một lần khi component được render.
+
+
+useEffect(() => {
     // Lắng nghe sự thay đổi của collection "books"
-    const unsubscribe = firestore().collection("books").onSnapshot((snapshot) => {
+    const unsubscribeBooks = firestore().collection("books").onSnapshot((snapshot) => {
       const booksData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -23,13 +43,53 @@ function BookIndex() {
       setBooks(booksData);
     });
 
+    // Lắng nghe sự thay đổi của collection "categories"
+    const unsubscribeCategories = firestore().collection("categories").onSnapshot((snapshot) => {
+      const categoriesData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(categoriesData);
+    });
+
     // Hủy đăng ký lắng nghe khi component unmount
-    return () => unsubscribe();
+    return () => {
+      unsubscribeBooks();
+      unsubscribeCategories();
+    };
   }, []); // Dependency array là rỗng, vì chúng ta chỉ muốn lắng nghe một lần khi component được render.
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const categoryDoc = await firestore().collection('categories').doc(selectedCategory.toString()).get();
+
+        if (categoryDoc.exists) {
+          const booksInCategory = categoryDoc.data().books || [];
+          const booksData = [];
+
+          for (const bookId of booksInCategory) {
+            const bookDoc = await firestore().collection('books').doc(bookId.toString()).get();
+
+            if (bookDoc.exists) {
+              booksData.push(bookDoc.data());
+            }
+          }
+
+          setFilteredBooks(booksData);
+        }
+      } catch (error) {
+        console.error('Error fetching data from Firestore:', error);
+      }
+    };
+
+    fetchBooks();
+  }, [selectedCategory, books]);
+
     return (  
         // header
     <View style={styles.container}>
-            {user ?  
+            {userLogin ?  
             <ShowNameComponent/> 
             : 
             <ButtonComponent mode='contained' icon='login'>Login</ButtonComponent>}
@@ -62,40 +122,37 @@ function BookIndex() {
                 </ScrollView>
                 {/* tab navigation */}
     
-            <ScrollView contentContainerStyle={styles.wrapCategory}>
-                    <Button mode="text"
-                    labelStyle={{
-                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                        ,fontSize:18
-                    }}>
-                        Best Seller
-                    </Button>
-                    <Button mode="text"
-                    labelStyle={{
-                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                        ,fontSize:18
-                    }}>
-                        The lastest
-                    </Button>
-                    <Button mode="text"
-                    labelStyle={{
-                        color:(setSelectedCategory== 1)? '#fff' : '#ccc'
-                        ,fontSize:18
-                    }}>
-                        Coming soon
-                    </Button>
-            </ScrollView >
-            <ScrollView>
-                {books.map((book) => (
-                    <ListBookComponent 
-                        key={book.id} 
-                        title={book.bookName} 
-                        author={book.author} 
-                        srcImg={{uri:book.bookCover}} 
-                        onClick={()=>{navigation.navigate('BookDetails', { book: book })}}/>
-                ))}
-        
-            </ScrollView>
+                <ScrollView horizontal contentContainerStyle={styles.wrapCategory}>
+  {categories.map((category) => (
+    <Button
+      key={category.id}
+      mode="text"
+      labelStyle={{
+        color: selectedCategory === category.id ? '#fff' : '#ccc',
+        fontSize: 18,
+      }}
+      onPress={() => setSelectedCategory(category.id)}
+    >
+      {category.categoryName}
+    </Button>
+  ))}
+</ScrollView>
+
+
+      <ScrollView>
+        {filteredBooks.map((book) => (
+          <ListBookComponent
+            key={book.id}
+            title={book.bookName}
+            author={book.author}
+            genres={book.genre}
+            srcImg={{ uri: book.bookCover }}
+            onClick={() => {
+              navigation.navigate('BookDetails', { book });
+            }}
+          />
+        ))}
+      </ScrollView>
         </ScrollView>
     </View>);
 }
